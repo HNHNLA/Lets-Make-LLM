@@ -8,7 +8,15 @@ This project is currently in an early **Alpha phase**. Full autonomous training 
 
 **Planned Release — v1.0.0-alpha**: The release is currently planned for **November 1–3, 2026**. This is an estimated release window and may change depending on development progress and testing.
 
-* **Windows Installer Note**: During a rapid OS migration to a Linux/Ubuntu environment and secure cloud backup (Proton Drive) quota management, legacy pre-compiled `.exe` binaries were omitted to prioritize core source code. However, the Inno Setup script (`setup.iss`) is included in the repository if you still wish to inspect or build it for Windows.
+* **AMD64 Windows Installer Note**: During a rapid OS migration to a Linux/Ubuntu environment and secure cloud backup (Proton Drive) quota management, legacy pre-compiled `.exe` binaries were omitted to prioritize core source code. However, the Inno Setup script (`setup.iss`) is included in the repository if you still wish to inspect or build it for Windows.
+
+**To build the Windows installer yourself, Python must be installed first. If Python is not installed, download and install it from the [official Python downloads page](https://www.python.org/downloads/windows/). Make sure to enable the `Add Python to PATH` option during installation.**
+**After installing Python, use the following commands to install PyInstaller and generate `lml.exe` inside the `dist/lml` directory:**
+```cmd
+cd C:/Users/Your USERNAME/Downloads/Lets-Make-LLM
+pip install pyinstaller
+pyinstaller --name lml --distpath dist/lml lml_engine.py
+```
 
 ### Project Roadmap
 
@@ -30,10 +38,6 @@ This project is currently in an early **Alpha phase**. Full autonomous training 
 sudo apt install ./lml_0.1.0-alpha_amd64.deb
 ```
 
-## Installation (amd64 Windows)
-
-Pre-compiled `.exe` binaries are currently omitted. You can inspect or build the installer yourself using the provided Inno Setup script (`setup.iss`) with [Inno Setup 7.1.0](https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe), or run the source code directly via Python.
-
 ## Usage (Example path: C:/users/user/Desktop/example)
 ```bash
 lml --dataset <path> --ftllm <path> --save_dir <path> --logging <path>
@@ -49,7 +53,15 @@ lml --dataset <path> --ftllm <path> --save_dir <path> --logging <path>
 
 **출시 예정 — v1.0.0-alpha**: 현재 **2026년 11월 1일~11월 3일** 출시를 목표로 하고 있습니다. 개발 진행 상황과 테스트 결과에 따라 일정은 변경될 수 있습니다.
 
-* **Windows 설치 프로그램 참고 사항**: 빠른 OS 마이그레이션과 Linux/Ubuntu 환경 전환, 그리고 보안 클라우드 백업(Proton Drive) 용량 관리 과정에서 기존 사전 컴파일된 `.exe` 바이너리는 핵심 소스 코드에 우선순위를 두기 위해 제외되었습니다. 그러나 Windows에서 직접 확인하거나 빌드하려면 저장소에 포함된 Inno Setup 스크립트(`setup.iss`)를 사용할 수 있습니다.
+* **AMD64 Windows 설치 프로그램 참고 사항**: 빠른 OS 마이그레이션과 Linux/Ubuntu 환경 전환, 그리고 보안 클라우드 백업(Proton Drive) 용량 관리 과정에서 기존 사전 컴파일된 `.exe` 바이너리는 핵심 소스 코드에 우선순위를 두기 위해 제외되었습니다. 그러나 Windows에서 직접 확인하거나 빌드하려면 저장소에 포함된 Inno Setup 스크립트(`setup.iss`)를 사용할 수 있습니다.
+
+**Windows 설치 프로그램을 직접 빌드하려면 먼저 Python이 설치되어 있어야 합니다. Python이 설치되어 있지 않은 경우 [Python 공식 다운로드 페이지](https://www.python.org/downloads/windows/)에서 다운로드하여 설치하십시오. 설치 과정에서 `Add Python to PATH` 옵션을 활성화해야 합니다.**
+**Python 설치가 완료되면 다음 명령어를 사용하여 PyInstaller를 설치하고 `dist/lml` 디렉터리에 `lml.exe`를 생성하십시오:**
+```cmd
+cd C:/Users/Your USERNAME/Downloads/Lets-Make-LLM
+pip install pyinstaller
+pyinstaller --name lml --distpath dist/lml lml_engine.py
+```
 
 ### 프로젝트 로드맵
 
@@ -70,10 +82,6 @@ lml --dataset <path> --ftllm <path> --save_dir <path> --logging <path>
 ```bash
 sudo apt install ./lml_0.1.0-alpha_amd64.deb
 ```
-
-## 설치 (amd64 Windows)
-
-사전 컴파일된 `.exe` 바이너리는 현재 제외되어 있습니다. 제공된 Inno Setup 스크립트(`setup.iss`)를 사용해 [Inno Setup 7.1.0](https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe)으로 직접 확인하거나 빌드할 수 있으며, 또는 Python을 통해 소스 코드를 직접 실행할 수도 있습니다.
 
 ## 사용법 (예시 경로: C:/users/user/Desktop/example)
 ```bash
