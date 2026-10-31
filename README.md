@@ -4,7 +4,7 @@
 > A meta-AI engine where a base model acts as an architect to design and build new model structures.
 
 **Alpha Stage & Notice**: 
-This project is currently in an early **Alpha phase**. Full autonomous training loops are under active development. The project is still under active development, and `pip install -e .` is **not yet supported and may fail** in the current version. Editable-install support is planned for `v0.2.0-alpha`; until then, do not assume that this installation method works.
+This project is currently in an early **Alpha phase**. Full autonomous training loops are under active development. The project is still under active development, and `pip install -e .` is **not yet supported and may fail** in the current version. Editable-install support is planned for `v1.0.0-alpha`; until then, do not assume that this installation method works.
 
 **Planned Release — v1.0.0-alpha**: The release is currently planned for **November 1–3, 2026**. This is an estimated release window and may change depending on development progress and testing.
 
@@ -45,7 +45,7 @@ lml --dataset <path> --ftllm <path> --save_dir <path> --logging <path>
 > 기본 모델이 설계자 역할을 맡아 새로운 모델 구조를 설계하고 구축하는 AI 엔진입니다.
 
 **알파 단계 및 안내**:
-이 프로젝트는 현재 초기 **알파 단계**에 있습니다. 완전한 자율 학습 루프는 개발 중이며, 프로젝트는 아직 활발히 개발되고 있습니다. 현재 버전에서는 `pip install -e .` 설치가 아직 지원되지 않으며 현재 상태에서는 실패할 수 있습니다. 편집 가능한 설치 지원은 `v0.2.0-alpha`에서 계획되어 있으며, 그 전까지는 이 설치 방식이 동작한다고 가정하지 마십시오.
+이 프로젝트는 현재 초기 **알파 단계**에 있습니다. 완전한 자율 학습 루프는 개발 중이며, 프로젝트는 아직 활발히 개발되고 있습니다. 현재 버전에서는 `pip install -e .` 설치가 아직 지원되지 않으며 현재 상태에서는 실패할 수 있습니다. 편집 가능한 설치 지원은 `v1.0.0-alpha`에서 계획되어 있으며, 그 전까지는 이 설치 방식이 동작한다고 가정하지 마십시오.
 
 **출시 예정 — v1.0.0-alpha**: 현재 **2026년 11월 1일~11월 3일** 출시를 목표로 하고 있습니다. 개발 진행 상황과 테스트 결과에 따라 일정은 변경될 수 있습니다.
 
