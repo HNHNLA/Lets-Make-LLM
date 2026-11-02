@@ -37,6 +37,11 @@ pyinstaller --name lml --distpath dist/lml lml_engine.py
 ```bash
 sudo apt install ./lml_0.1.0-alpha_amd64.deb
 ```
+## Uninstall (amd64 Ubuntu/Debian)
+
+```bash
+sudo apt purge lml
+```
 
 ## Usage (Example path: C:/users/user/Desktop/example)
 ```bash
@@ -81,6 +86,11 @@ pyinstaller --name lml --distpath dist/lml lml_engine.py
 
 ```bash
 sudo apt install ./lml_0.1.0-alpha_amd64.deb
+```
+
+## 삭제 (amd64 Ubuntu/Debian)
+```bash
+sudo apt purge lml
 ```
 
 ## 사용법 (예시 경로: C:/users/user/Desktop/example)
