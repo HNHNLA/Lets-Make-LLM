@@ -182,7 +182,7 @@ LML은 초기 **알파** 단계입니다. 전체 파이프라인(분석 → 코�
 
 ## 설치
 
-### 방법 A: pip (권장, Linux / macOS / Windows)
+### 방법 A: pip (Linux / macOS / Windows)
 
 ```bash
 git clone https://github.com/HNHNLA/Lets-Make-LLM.git
