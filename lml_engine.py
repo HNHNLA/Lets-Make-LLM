@@ -1,158 +1,140 @@
-import sys
 import argparse
 import os
-import math
-from lml_core import LMLCore
-from lml_dataset_loader import DatasetLoader
-from lml_utils import Logger
+import sys
+from pathlib import Path
 
-def analyze_and_recommend_parameters(dataset_path, ftllm_path):
-    """
-    Analyzes the dataset volume and base model (ftllm) to recommend 
-    an optimal parameter size (in Billions) for the new model.
-    """
-    print("[i] Running pre-flight resource analysis for LML...")
+VERSION = "1.0.0-alpha"
 
-    # 1. Dataset volume analysis (Estimate token count based on file size)
-    if not os.path.exists(dataset_path):
-        raise FileNotFoundError(f"Dataset path not found: {dataset_path}")
-    
-    file_size_bytes = os.path.getsize(dataset_path)
-    file_size_mb = file_size_bytes / (1024 * 1024)
-    
-    # Rough estimation: 1MB of text jsonl is roughly ~250,000 tokens
-    estimated_tokens = file_size_mb * 250000
-    token_billions = estimated_tokens / 1_000_000_000
+def resolve_persona_path():
+    # Support source checkouts, editable installs, and the data-file install location.
+    candidates = []
+    # In a PyInstaller-frozen Windows install, the persona is installed beside
+    # lml.exe by setup.iss, not inside the temporary _MEIPASS bundle directory.
+    if getattr(sys, "frozen", False):
+        candidates.append(Path(sys.executable).resolve().parent / "lml_persona.md")
 
-    # 2. Base model (ftllm) capacity analysis
-    base_model_size_b = 7.0
-    if "1b" in ftllm_path.lower():
-        base_model_size_b = 1.0
-    elif "3b" in ftllm_path.lower():
-        base_model_size_b = 3.0
-    elif "7b" in ftllm_path.lower():
-        base_model_size_b = 7.0
-    elif "13b" in ftllm_path.lower():
-        base_model_size_b = 13.0
-    elif "70b" in ftllm_path.lower():
-        base_model_size_b = 70.0
+    candidates.extend([
+        Path(__file__).resolve().with_name("lml_persona.md"),
+        Path.cwd() / "lml_persona.md",
+        Path(sys.prefix) / "share" / "lml" / "lml_persona.md",
+    ])
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate.resolve()
+    return candidates[0].resolve()
 
-    # 3. Recommendation logic
-    recommended_min_b = max(0.5, round(token_billions / 20, 1))
-    recommended_max_b = min(base_model_size_b, round(token_billions / 5, 1))
 
-    if recommended_min_b > recommended_max_b:
-        recommended_max_b = recommended_min_b + 1.0
-
-    print("\n" + "="*45)
-    print(" 🚀 LML PRE-FLIGHT RESOURCE ANALYSIS")
-    print("="*45)
-    print(f" - Dataset Size     : {file_size_mb:.2f} MB (~{token_billions:.3f}B tokens est.)")
-    print(f" - Base Engine      : {ftllm_path} (~{base_model_size_b}B capacity)")
-    print(f" - Recommended Size : {recommended_min_b}B ~ {recommended_max_b}B")
-    print("="*45 + "\n")
-
-    # Prompt user for target parameter size input
+def load_required_persona(parser):
+    # The persona is mandatory and must contain usable instructions.
+    persona_path = resolve_persona_path()
+    if not persona_path.is_file():
+        parser.error(f"required persona file does not exist: {persona_path}")
     try:
-        user_input = input(f"Enter target parameter size in Billions [Default {recommended_min_b}B]: ").strip()
-        if user_input == "":
-            selected_b = recommended_min_b
-        else:
-            selected_b = float(user_input)
-    except ValueError:
-        selected_b = recommended_min_b
-        print(f"[!] Invalid input. Defaulting to {selected_b}B.")
+        persona_content = persona_path.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        parser.error(f"could not read persona file {persona_path}: {exc}")
+    if not persona_content:
+        parser.error(f"persona file is empty: {persona_path}")
+    return persona_path, persona_content
 
-    print(f"[i] Target model parameter size set to: {selected_b}B\n")
-    return selected_b
 
-class LMLEngine:
-    def __init__(self, dataset_path, ftllm_path, output_path="output.jsonl", enable_logging=False, log_dir="."):
-        self.dataset_path = dataset_path
-        self.ftllm_path = ftllm_path
-        self.output_path = output_path
-        self.enable_logging = enable_logging
-        self.log_dir = log_dir
+def analyze_dataset(dataset_path, raw_data, device):
+    # Report actual file size and loaded JSONL characteristics.
+    file_size = os.path.getsize(dataset_path)
+    keys = sorted({str(key) for row in raw_data for key in row})
+    print("\n" + "=" * 48)
+    print(" LML PRE-FLIGHT DATASET ANALYSIS")
+    print("=" * 48)
+    print(f" Dataset file : {os.path.abspath(dataset_path)}")
+    print(f" File size    : {file_size / (1024 * 1024):.2f} MiB")
+    print(f" JSONL rows   : {len(raw_data)}")
+    print(f" Field names  : {', '.join(keys) if keys else '(none)'}")
+    print(f" Device       : {device}")
+    print("=" * 48 + "\n")
 
-        if self.enable_logging:
-            Logger.log(f"Initialization started. Dataset path: {self.dataset_path}", log_dir=self.log_dir)
-
-        # Load meta-AI developer persona markdown file safely for Ubuntu/Linux
-        if getattr(sys, 'frozen', False):
-            base_path = os.path.dirname(sys.executable)
-        else:
-            base_path = os.path.dirname(os.path.abspath(__file__))
-
-        persona_path = os.path.join(base_path, "lml_persona.md")
-
-        if not os.path.exists(persona_path):
-            persona_path = os.path.abspath("lml_persona.md")
-
-        if os.path.exists(persona_path):
-            with open(persona_path, "r", encoding="utf-8") as f:
-                self.persona_content = f.read()
-            if self.enable_logging:
-                Logger.log("Persona file loaded successfully.")
-        else:
-            raise FileNotFoundError(f"Persona file not found. Check path: {persona_path}")
-
-        # Load Factory LLM (Meta-AI architect engine)
-        self.lml = LMLCore(self.ftllm_path)
-        self.lml.load_model()
-
-        # Load dataset using DatasetLoader
-        loader = DatasetLoader(self.dataset_path)
-        self.dataset = loader.load_data()
-
-        if self.enable_logging:
-            Logger.log(f"Dataset loaded successfully. Total items: {len(self.dataset)}", log_dir=self.log_dir)
-
-    def run_factory_build(self, save_dir="result_model"):
-        if self.enable_logging:
-            Logger.log("Factory model build process started.", log_dir=self.log_dir)
-
-        print(f"[i] Factory LLM build process has started. (Alpha Placeholder Mode)")
-
-        os.makedirs(save_dir, exist_ok=True)
-        # Execute model build pipeline
-        self.lml.build_new_model(self.dataset, save_dir, persona=self.persona_content)
-
-        if self.enable_logging:
-            Logger.log("Logging successfully maintained.", log_dir=self.log_dir)
 
 def print_custom_help():
-    print("Usage:")
-    print("  lml --dataset <path> --ftllm <path> --save_dir <path> --logging <path>")
+    print("Usage (--logging is optional):")
+    print("  lml --dataset <path> --ftllm <path> --verifier-llm <path> --save_dir <path> --max-length <tokens> --logging <path>")
+    print("  lml --version")
     print("  lml help")
 
-def main():
-    if len(sys.argv) > 1 and sys.argv[1] == "help":
-        print_custom_help()
-        return
 
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--dataset", type=str, required=True, help="Path to the training dataset")
-    parser.add_argument("--ftllm", type=str, required=True, help="Path to the Factory LLM base model")
-    parser.add_argument("--save_dir", type=str, required=True, help="Directory to save the generated model")
-    parser.add_argument("--logging", type=str, default=None, help="Directory path to save logs")
-
-    args = parser.parse_args()
-
-    # Run parameter recommendation analysis before starting engine
-    target_params_b = analyze_and_recommend_parameters(args.dataset, args.ftllm)
-
-    enable_logging = args.logging is not None
-    log_dir = args.logging if enable_logging else "."
-
-    engine = LMLEngine(
-        dataset_path=args.dataset,
-        ftllm_path=args.ftllm,
-        output_path="output.jsonl",
-        enable_logging=enable_logging,
-        log_dir=log_dir
+def main(argv=None):
+    parser = argparse.ArgumentParser(
+        prog="lml",
+        description="LML alpha: AI-generated tokenizer and training pipeline with separate AI review.",
     )
+    parser.add_argument("--version", action="version", version=f"LML {VERSION}")
+    parser.add_argument("--dataset", type=str, help="Path to the JSONL training dataset")
+    parser.add_argument("--ftllm", type=str, help="Path to the local generator/factory model")
+    parser.add_argument("--verifier-llm", type=str, help="Path to a separate local code-review model")
+    parser.add_argument("--save_dir", type=str, help="Directory for generated artifacts and the trained model")
+    parser.add_argument("--max-length", type=int, help="Maximum token sequence length")
+    parser.add_argument("--logging", type=str, default=None, help="Directory path to save logs")
+    parser.add_argument("command", nargs="?", help=argparse.SUPPRESS)
 
-    engine.run_factory_build(save_dir=args.save_dir)
+    args = parser.parse_args(argv)
+    if args.command == "help":
+        print_custom_help()
+        return 0
+
+    required = {
+        "--dataset": args.dataset,
+        "--ftllm": args.ftllm,
+        "--verifier-llm": args.verifier_llm,
+        "--save_dir": args.save_dir,
+        "--max-length": args.max_length,
+    }
+    missing = [name for name, value in required.items() if not value]
+    if missing:
+        parser.error("the following arguments are required: " + ", ".join(missing))
+    if args.max_length < 8:
+        parser.error("--max-length must be at least 8")
+    if not os.path.isfile(args.dataset):
+        parser.error(f"dataset file does not exist: {args.dataset}")
+    if not os.path.isdir(args.ftllm):
+        parser.error(f"generator model path must be a local directory: {args.ftllm}")
+    if not os.path.isdir(args.verifier_llm):
+        parser.error(f"verifier model path must be a local directory: {args.verifier_llm}")
+
+    # Fail before loading large ML models if the required persona is missing.
+    persona_path, persona_content = load_required_persona(parser)
+
+    try:
+        import lml_config
+        from lml_core import LMLPipeline
+        from lml_dataset_loader import DatasetLoader
+        from lml_utils import Logger
+
+        raw_data = DatasetLoader(args.dataset).load_data()
+        import lml_config
+        analyze_dataset(args.dataset, raw_data, lml_config.DEVICE)
+        if args.logging:
+            Logger.log("LML v1.0.0-alpha pipeline started.", args.logging)
+
+        pipeline = LMLPipeline(
+            generator_path=args.ftllm,
+            verifier_path=args.verifier_llm,
+            dataset_path=args.dataset,
+            save_dir=args.save_dir,
+            max_length=args.max_length,
+            persona_content=persona_content,
+            persona_path=str(persona_path),
+        )
+        pipeline.run(raw_data)
+        if args.logging:
+            Logger.log("LML pipeline completed.", args.logging)
+        return 0
+    except KeyboardInterrupt:
+        print("\n[!] Interrupted by user.", file=sys.stderr)
+        return 130
+    except Exception as exc:
+        print(f"[ERROR] {exc}", file=sys.stderr)
+        if args.logging:
+            from lml_utils import Logger
+            Logger.log(f"ERROR: {exc}", args.logging)
+        return 1
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

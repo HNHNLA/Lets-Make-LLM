@@ -1,7 +1,0 @@
-Package: lml
-Version: 0.1.0-alpha
-Section: utils
-Priority: optional
-Architecture: amd64
-Maintainer: nether1082 <gitdev@nether1082.pe.kr>
-Description: Let's Make LLM (LML) - Meta-AI Engine CLI
