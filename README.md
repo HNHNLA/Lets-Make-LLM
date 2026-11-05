@@ -53,6 +53,10 @@ If you need a specific CUDA or ROCm build of PyTorch, install it from [pytorch.o
 ### Option B: Debian / Ubuntu (.deb)
 
 ```bash
+git clone https://github.com/HNHNLA/Lets-Make-LLM
+cd Lets-Make-LLM
+bash build_deb.sh
+cd build
 sudo apt install ./lml_1.0.0~alpha_all.deb
 ```
 
@@ -198,6 +202,10 @@ lml --version
 ### 방법 B: Debian / Ubuntu (.deb)
 
 ```bash
+git clone https://github.com/HNHNLA/Lets-Make-LLM
+cd Lets-Make-LLM
+bash build_deb.sh
+cd build
 sudo apt install ./lml_1.0.0~alpha_all.deb
 ```
 
