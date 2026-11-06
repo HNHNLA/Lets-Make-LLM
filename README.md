@@ -43,7 +43,7 @@ LML is an early **alpha**. The full pipeline (analysis → code generation → v
 git clone https://github.com/HNHNLA/Lets-Make-LLM.git
 cd Lets-Make-LLM
 python3 -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -e .
 lml --version
 ```
@@ -192,7 +192,7 @@ LML은 초기 **알파** 단계입니다. 전체 파이프라인(분석 → 코�
 git clone https://github.com/HNHNLA/Lets-Make-LLM.git
 cd Lets-Make-LLM
 python3 -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -e .
 lml --version
 ```
