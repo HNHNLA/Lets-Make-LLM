@@ -106,7 +106,7 @@ lml --dataset ./data/train.jsonl \
 
 `lml help` prints a short usage summary.
 
-### Output layout
+### Example output layout
 
 ```
 lml_output/
