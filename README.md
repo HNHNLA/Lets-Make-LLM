@@ -255,7 +255,7 @@ lml --dataset ./data/train.jsonl \
 
 `lml help`로 간단한 사용법을 볼 수 있습니다.
 
-### 출력 구조
+### 예시 출력 구조
 
 ```
 lml_output/
